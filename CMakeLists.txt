@@ -2,6 +2,8 @@
 
 cmake_minimum_required(VERSION 3.15)
 
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "g++")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
@@ -47,24 +49,75 @@ source_group("Sources" FILES ${PROJECT_SOURCES})
 # add_executable( ${this} ${sources} )
 add_executable(${this} ${PROJECT_SOURCES} ${PROJECT_HEADERS} )
 
+# Adding Libraries 
+if(MSVC OR MSYS OR MINGW)
 
-find_package(fmt REQUIRED)
-find_package(range-v3 REQUIRED)
-find_package(cxxopts REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
-find_package(GLUT REQUIRED)
-find_package(vulkan REQUIRED)
+  find_package(fmt REQUIRED)
+  find_package(range-v3 REQUIRED)
+  find_package(cxxopts REQUIRED)
+  find_package(glfw3 REQUIRED)
+  find_package(glm REQUIRED)
+  find_package(GLUT REQUIRED)
+  find_package(vulkan REQUIRED)
+else()
+	include_directories(
+		    # Headers/
+                    # Vendors/assimp/include/
+                    # Vendors/bullet/src/
+                    # Vendors/glad/include/
+                    # Vendors/glfw/include/
+                    # Vendors/glm/
+                    # Vendors/stb/
+                    # $(Vendors)/include/
 
-target_link_libraries( ${this} PUBLIC ${target_lib} ) 
-target_include_directories( ${this} PUBLIC ${includes} ) 
-target_link_libraries(${this}
-  PRIVATE
-    fmt::fmt
-    range-v3::range-v3
-    cxxopts::cxxopts
-    glfw
-    glm::glm
-    GLUT::GLUT
-    Vulkan::Vulkan
-)
+	)
+	list(APPEND CMAKE_PREFIX_PATH "/usr/lib")
+	find_package(glfw3 REQUIRED)
+	find_package(Vulkan REQUIRED)
+	find_package(glm REQUIRED)
+
+  # GLUT
+  find_package(GLUT REQUIRED)
+  include_directories(${GLUT_INCLUDE_DIR})
+  if(NOT GLUT_FOUND)
+      message(ERROR "GLUT not found!")
+  endif(NOT GLUT_FOUND)
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  target_link_libraries( ${this} PUBLIC ${target_lib} ) 
+  target_include_directories( ${this} PUBLIC ${includes} ) 
+  target_link_libraries(${this}
+    PRIVATE
+      fmt::fmt
+      range-v3::range-v3
+      cxxopts::cxxopts
+      glfw
+      glm::glm
+      GLUT::GLUT
+      Vulkan::Vulkan
+  )
+else()
+	target_link_libraries(${PROJECT_NAME} glfw)
+  target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan)
+  target_link_libraries(${PROJECT_NAME} glm::glm)
+  
+endif()
+
+# Adding dependencies eg Shaders etc
+# add_dependencies(${PROJECT_NAME} assets)
+
+# Define project properties
+set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+# Define C++ version to be used for building the project
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+
+# Define C version to be used for building the project
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD_REQUIRED ON)

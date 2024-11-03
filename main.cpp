@@ -410,6 +410,7 @@ int main(int, char**)
     const char** glfw_extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
     for (uint32_t i = 0; i < extensions_count; i++)
         extensions.push_back(glfw_extensions[i]);
+        
     SetupVulkan(extensions);
 
     // Create Window Surface
