@@ -1,0 +1,11 @@
+{
+  "dependencies": [
+    "cxxopts",
+    "fmt",
+    "glfw3",
+    "glm",
+    "range-v3",
+    "vulkan",
+    "freeglut"
+  ]
+}
