@@ -5,5 +5,5 @@
 * This CMakeLists.txt will build everything in the build directory
 * main.cpp is from the IMGui example
 * To build
-    - cmake --preset-default
+    - cmake --preset=default
     - cmake --build build
